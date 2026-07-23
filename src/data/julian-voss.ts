@@ -13,6 +13,7 @@ const trackRecordCitations: Citation[] = [
       date: "April 2026",
       sourceType: "article",
       platform: "Daily Culture Wire",
+      title: "Voss Addresses 'Nepo' Criticism Amid Cookbook Launch",
       quote:
         "Voss pushed back on commenters questioning whether his family's restaurant background gave him an unfair head start in the industry.",
       url: "https://example.com/dailyculturewire/voss-nepo-criticism",
@@ -48,6 +49,7 @@ const affiliationsCitations: Citation[] = [
       date: "March 2025",
       sourceType: "article",
       platform: "Regional Eats Magazine",
+      title: "A Family Business, Three Generations Later",
       quote:
         "The chain settled a wage dispute with former staff in 2019, a detail that has occasionally resurfaced in online discussion of the family's public profile.",
       url: "https://example.com/regionaleats/family-business-three-generations",
@@ -111,7 +113,9 @@ const industryCitations: Citation[] = [
       date: "February 2026",
       sourceType: "article",
       platform: "Bite Magazine",
-      quote: "Rising Stars in Food Media — featuring Julian Voss.",
+      title: "Rising Stars in Food Media",
+      quote:
+        "Voss is among a cohort of creators bridging cookbook publishing with short-form recipe video.",
       url: "https://example.com/bitemagazine/rising-stars-food-media",
     },
     2

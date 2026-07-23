@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import type { CaseSummary } from "@/types";
 import { StatusBadge, getCaseStatusLabel } from "@/components/status-badge";
@@ -15,6 +16,7 @@ import {
   getNextDeadlineField,
   type DeadlineUrgency,
 } from "@/lib/deadline";
+import { casesById } from "@/data";
 import { cn } from "@/lib/utils";
 
 const URGENCY_CLASS: Record<DeadlineUrgency, string> = {
@@ -115,9 +117,17 @@ function buildAllColumns(): DataTableColumn<CaseSummary>[] {
       id: "influencer",
       header: "Influencer",
       getValue: (row) => row.influencerName,
-      cell: (row) => (
-        <span className="font-medium text-charcoal">{row.influencerName}</span>
-      ),
+      cell: (row) =>
+        casesById[row.id] ? (
+          <Link
+            href={`/cases/${row.id}`}
+            className="font-medium text-charcoal underline-offset-2 hover:text-electric-blue hover:underline"
+          >
+            {row.influencerName}
+          </Link>
+        ) : (
+          <span className="font-medium text-charcoal">{row.influencerName}</span>
+        ),
     },
     {
       id: "market",

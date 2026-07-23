@@ -6,6 +6,8 @@ import { queueOnlyCases } from "./queue-cases";
 export { julianVossCase } from "./julian-voss";
 export { maraWhitfieldCase } from "./mara-whitfield";
 export { queueOnlyCases } from "./queue-cases";
+export { auditEvents } from "./audit-events";
+export type { AuditEvent, AuditActorKind } from "./audit-events";
 
 /** Full cases with scorecards + social profiles (demo fixtures). */
 export const fullCases: Case[] = [maraWhitfieldCase, julianVossCase];

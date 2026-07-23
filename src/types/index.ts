@@ -40,6 +40,8 @@ export type Citation = {
   date: string;
   sourceType: "social_post" | "article" | "ig_story" | "youtube_video" | "other";
   platform: string;
+  /** Article/video/post title — distinct from the quote body. */
+  title?: string;
   quote: string;
   url: string;
   order: number;

@@ -13,7 +13,7 @@ Build a frontend-only proof-of-concept workspace that demonstrates how AI-assist
 
 ### Non-goals for v1
 - Real backend, real auth, real integrations (Smartsheet, Traackr, OneDrive)
-- Real GPT calls — AI Analysis output is mocked/static for this version
+- Real GPT calls — Coverage Scan / Suggest Risk Level output is mocked/static for this version
 - Changing the actual client-facing intake or submission format
 
 ---
@@ -34,7 +34,7 @@ v1 doesn't need real authentication — a simple role switcher is sufficient to 
 ## 3. Scope (v1, frontend-only)
 
 **In scope:**
-- Four core pages: Home/Queue, Case Workspace, AI Analysis, Reports & Audit
+- Three core pages: Home/Queue, Case Workspace, Reports & Audit
 - Full mock data layer, typed, structured to slot in a real backend later without UI changes
 - All shared components (status badge, risk selector, citation block, AI output card, data table, social stats module)
 - One complete fictional case populated end-to-end for demo purposes
@@ -64,7 +64,8 @@ Left-nav sub-sections within a case:
 2. **Evidence** — two parts:
    - **Social Profiles & Audience Stats module** (new — see 4.2.1)
    - Gathered evidence items (posts, articles, screenshots) mapped to scorecard sections
-3. **Scorecard Draft** — the seven required sections, each with AI-drafted summary (editable), citation list, and Risk Level selector (AI-suggested → human-confirmed)
+   - **"Run Coverage Scan" action** — triggers the AI research pass (mocked for v1); results render as AI Output Cards (mode label, timestamp, gaps checked, contradictions flagged) with an "Insert into case" action per item, same as originally scoped for the standalone AI Analysis page — just performed in context here instead of on a separate page
+3. **Scorecard Draft** — the seven required sections, each with AI-drafted summary (editable), citation list, manual "Add Citation" entry, and a Risk Level selector (AI-suggested → human-confirmed). Each section also has a **"Suggest Risk Level" action** that runs Scorecard Assembly-style reasoning per max-analysis-engine-spec.md, inline
 4. **Reviewer Notes** — section-scoped feedback thread
 5. **Activity** — case-scoped status/change history
 
@@ -86,15 +87,11 @@ This module feeds the **Strategic Fit → Social Content & Customer Relevance** 
 
 **Mock data note:** all numbers/handles used in the demo should be fully fictional, structurally similar to real analytics tools but not reproducing any real creator's actual data.
 
-### 4.3 AI Analysis
-- Mode toggle: Coverage Scan / Scorecard Assembly
-- Prompt chips including "Suggest risk levels" (per Analysis Engine spec)
-- Every output: mode label, timestamp/run ID, section content, citations, gaps checked, contradictions flagged, suggested risk level + reasoning (Assembly mode), single "Insert into case" action
-
-### 4.4 Reports & Audit
+### 4.3 Reports & Audit
 - Turnaround time distribution
 - Volume vs. threshold tracking
 - Immutable audit table: actor, timestamp, action, before/after
+- **AI Runs history** — a filtered view of the audit table scoped to AI actions specifically (Coverage Scans run, Risk Levels suggested, per case), since there's no longer a standalone AI Analysis page to browse this on. This replaces that page's "review past outputs" function with an audit-style log instead of an interactive workbench.
 - Filters: human actions / AI runs / specific case
 
 ---
@@ -139,6 +136,7 @@ type Citation = {
   date: string;
   sourceType: 'social_post' | 'article' | 'ig_story' | 'youtube_video' | 'other';
   platform: string;
+  title?: string;                // article/video/post title, shown alongside platform name
   quote: string;
   url: string;
   order: number;

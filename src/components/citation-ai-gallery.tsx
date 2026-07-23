@@ -44,7 +44,8 @@ export function CitationAndAIOutputGallery() {
           <p className="text-body text-steel">
             Mode label, timestamp/run ID, content slot, single{" "}
             <span className="font-medium text-charcoal">Insert into case</span>{" "}
-            action — nothing auto-commits.
+            action — nothing auto-commits. In product, Coverage Scan cards
+            render on Evidence; risk suggestions feed Scorecard selectors.
           </p>
         </div>
 

@@ -8,7 +8,7 @@ type CitationBlockProps = {
 
 /**
  * Scorecard citation pattern: Month Year + hyperlinked platform/publication
- * name (not article title) + quote.
+ * name (not article title) + optional title + quote.
  */
 export function CitationBlock({ citation, className }: CitationBlockProps) {
   return (
@@ -28,6 +28,12 @@ export function CitationBlock({ citation, className }: CitationBlockProps) {
         >
           {citation.platform}
         </a>
+        {citation.title ? (
+          <>
+            <span className="text-fog"> — </span>
+            <span className="text-slate">&ldquo;{citation.title}&rdquo;</span>
+          </>
+        ) : null}
       </figcaption>
       <blockquote className="border-l-2 border-ash pl-12px text-slate">
         <span className="text-fog">“</span>

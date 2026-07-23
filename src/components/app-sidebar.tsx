@@ -12,11 +12,6 @@ const NAV_ITEMS = [
     match: (path: string) => path.startsWith("/cases"),
   },
   {
-    href: "/ai",
-    label: "AI Analysis",
-    match: (path: string) => path.startsWith("/ai"),
-  },
-  {
     href: "/reports",
     label: "Reports & Audit",
     match: (path: string) => path.startsWith("/reports"),

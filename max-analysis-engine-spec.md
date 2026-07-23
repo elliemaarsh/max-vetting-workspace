@@ -81,5 +81,5 @@ Every result returned includes:
 
 ## 6. Notes for build
 
-- This maps to the **AI Analysis** page in the product outline — the prompt-chip list there should be updated to include "Suggest risk levels" as a distinct chip alongside "Run full coverage scan" and "Draft [section] only"
+- This maps to **inline Case Workspace actions** — "Run Coverage Scan" on Evidence and "Suggest Risk Level" per section on Scorecard Draft (the standalone AI Analysis page was cut; past runs surface under Reports & Audit → AI runs filter)
 - The Risk Level component (Section 5 of the product outline) should be revised: instead of "blank until human sets it," it now renders as **AI-suggested (visually distinct, e.g. dashed border + "Suggested" label) → human confirms → becomes solid/final state**. This preserves the original trust principle while actually using the model's read of the evidence.

@@ -14,6 +14,7 @@ const trackRecordCitations: Citation[] = [
       date: "March 2026",
       sourceType: "article",
       platform: "SwimWorld Daily",
+      title: "Whitfield Responds to Relay Disqualification Controversy",
       quote:
         "Whitfield said she felt the review process moved too quickly for an appeal to be meaningfully considered before the medal ceremony.",
       url: "https://example.com/swimworld/whitfield-relay-disqualification",
@@ -36,6 +37,7 @@ const trackRecordCitations: Citation[] = [
       date: "January 2025",
       sourceType: "article",
       platform: "Metro Sports Wire",
+      title: "Fans Rally Behind Whitfield After Disqualification Reversal",
       quote:
         "Supporters flooded social media in defense of the swimmer, arguing the ruling body's timeline was unfair to athletes.",
       url: "https://example.com/metrosportswire/whitfield-disqualification-reversal",
@@ -98,6 +100,7 @@ const industryCitations: Citation[] = [
       date: "February 2026",
       sourceType: "article",
       platform: "Athletic Weekly",
+      title: "Five Swimmers to Watch This Season",
       quote:
         "Whitfield's technical consistency has made her one of the most reliable relay anchors on the roster.",
       url: "https://example.com/athleticweekly/five-swimmers-to-watch",
@@ -123,7 +126,9 @@ const socialContentCitations: Citation[] = [
       date: "March 2026",
       sourceType: "youtube_video",
       platform: "YouTube",
-      quote: "A Day in My Life: Pre-Meet Routine.",
+      title: "A Day in My Life: Pre-Meet Routine",
+      quote:
+        "Whitfield walks through her pre-meet morning — early practice, recovery, and team warm-ups before competition day.",
       url: "https://example.com/youtube/mara-whitfield/pre-meet-routine",
     },
     2

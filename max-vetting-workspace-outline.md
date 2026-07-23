@@ -30,13 +30,13 @@ MAX is an internal operations platform that replaces the current Smartsheet + Br
 
 ## 3. Information Architecture (v1)
 
-Trimmed to four functional areas — no settings/admin/rules-config screens in v1, they don't demo well and aren't needed to prove the concept.
+Trimmed to three functional areas. AI Analysis was originally scoped as a fourth standalone page, but its actions (Coverage Scan, Suggest Risk Level) turned out to be redundant as a separate destination once the Evidence and Scorecard Draft tabs already surface AI output inline — so those actions live directly in the Case Workspace instead of on their own page.
 
 ```
 ├── Home / Queue          → what needs my attention right now
 ├── Case Workspace         → the actual vetting unit — one influencer, one case
-├── AI Analysis            → coverage scan + scorecard draft generation
-└── Reports & Audit        → what shipped, what changed, turnaround stats
+│                            (includes inline Coverage Scan + Suggest Risk Level actions)
+└── Reports & Audit        → what shipped, what changed, turnaround stats, AI Runs history
 ```
 
 Left sidebar (persistent), Dub-style: compact nav items, active state as a subtle tinted background, no icons required beyond simple monoline glyphs.
@@ -85,9 +85,10 @@ type CaseSummary = {
    - List of gathered evidence items (social post, article, IG story screenshot, etc.)
    - Each item: source, date, type, which scorecard section it maps to, a link/preview
    - This is where the AI Coverage Scan results land before being placed into the scorecard — evidence exists here *before* it's written into prose
+   - **"Run Coverage Scan" action lives here** — this and the Scorecard Draft's "Suggest Risk Level" action absorb what was originally scoped as a standalone AI Analysis page (cut — see section 3 note); output still renders with mode label, timestamp, gaps checked, contradictions flagged, and an explicit "Insert into case" action
 3. **Scorecard Draft** — the actual Brand Safety / Strategic Fit sections:
    - Track Record & Personal Conduct, Brand Values, Affiliations, Political Involvement, Competitive Partnerships, Industry & Branded Content, Social Content & Customer Relevance
-   - Each section: generated summary paragraph (editable), citation list (reverse-chron, auto-formatted), and a **Risk Level selector that only a human can set** — this field should be visually distinct (e.g., bordered/highlighted empty state until filled) to reinforce that it's a required human action, not a default
+   - Each section: generated summary paragraph (editable), citation list (reverse-chron, auto-formatted, plus manual "Add Citation" entry), **Suggest Risk Level** (sets AI-suggested state on the Risk Level selector), and a **Risk Level selector — AI-suggested with visible reasoning, human-confirmed** (see max-vetting-workspace-prd.md section 5 for the current type; this outline's data model below is an earlier draft, PRD is the source of truth)
 4. **Reviewer Notes** — feedback thread tied to specific sections, mirrors the "feedback in red" convention from the current process
 5. **Activity** — status changes, who touched what, when (this feeds Reports & Audit but scoped to one case)
 
@@ -113,25 +114,13 @@ type Citation = {
 
 ---
 
-### 4.3 AI Analysis
-
-**Purpose:** Where the two existing GPTs' functions live as one integrated panel rather than a separate chatbot tab. Not a general chat window — a structured composer scoped to the current case.
-
-**Contents:**
-- Mode toggle: **Coverage Scan** (find evidence) vs. **Scorecard Assembly** (format evidence into prose) — mirrors the two real GPTs
-- Prompt chips: "Run full coverage scan," "Draft [section name] only," "Re-vet since [last date]," "Check for missed political content"
-- Output always renders with:
-  - Output type label (`AI Coverage Scan` / `AI Scorecard Draft`)
-  - Timestamp / run ID
-  - Section-by-section results with citations attached
-  - A clear "Send to Evidence" or "Insert into Scorecard" action — nothing auto-commits to the case record without a human click
-- Never show a bare risk score. If the AI flags something, it shows *why* (which section, which evidence) — never a number alone.
-
----
-
-### 4.4 Reports & Audit
+### 4.3 Reports & Audit
 
 **Purpose:** Program-management view — less about one case, more about throughput and compliance history.
+
+**Note:** this section now also carries the "review past AI outputs" function originally scoped for a standalone AI Analysis page — see below.
+
+**AI Runs history:** since Coverage Scan and Suggest Risk Level actions now live inline on the Evidence and Scorecard Draft tabs (rather than a separate AI Analysis page), Reports & Audit's audit table should support filtering to AI actions specifically, functioning as the log/history view for past AI generations across cases. This is a read-only audit log, not an interactive workbench — running a new AI action always happens inline on the case itself.
 
 **Contents:**
 - Turnaround time distribution (vet → review → QA/QC → submit)
@@ -158,14 +147,13 @@ These get built once and reused everywhere — worth prompting as shared compone
 1. Shared components (status badge, risk selector, citation block, table)
 2. Home/Queue (proves the data model + table pattern)
 3. Case Workspace → Overview + Scorecard Draft (the meat of the demo)
-4. AI Analysis panel (mocked responses using the Andy Ricker-style format, but with a fictional creator)
-5. Evidence tab
-6. Reports & Audit (last — least demo-critical, most "nice to have" for the pitch)
+4. Evidence tab with inline Coverage Scan + Scorecard Suggest Risk Level (mocked AI)
+5. Reports & Audit (throughput + AI Runs history)
 
 ---
 
 ## 7. Notes for the Notion doc
 
-- Keep a running list of what's mocked vs. real — e.g., "AI Analysis returns static fictional output for [Creator X]; backend integration is a v2 item"
+- Keep a running list of what's mocked vs. real — e.g., "Coverage Scan / Suggest Risk Level return static fictional output for [Creator X]; backend integration is a v2 item"
 - Every scorecard example content in the demo should use fully fictional creators/quotes, structurally similar to the real process but containing no actual Amex/Edelman data
 - If you want a stronger pitch narrative: frame the demo around one fictional case moving start to finish (Received → Submitted) so the story is "watch a vet happen," not "look at empty screens"
