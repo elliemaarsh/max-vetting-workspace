@@ -208,7 +208,7 @@ export const useCasesStore = create<CasesStore>((set, get) => ({
       next.riskValue ? ` ${next.riskValue}` : ""
     }`;
 
-    let sections = full.scorecardSections.map((s) =>
+    const sections = full.scorecardSections.map((s) =>
       s.sectionName === sectionName
         ? {
             ...s,
