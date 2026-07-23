@@ -5,6 +5,7 @@ import {
 import { RiskLevelSelectorGallery } from "@/components/risk-level-selector-gallery";
 import { CitationAndAIOutputGallery } from "@/components/citation-ai-gallery";
 import { DataTableGallery } from "@/components/data-table-gallery";
+import { SocialProfilesGallery } from "@/components/social-profiles-gallery";
 
 /**
  * Storybook-style component gallery for shared UI primitives.
@@ -78,6 +79,10 @@ export default function ComponentsPage() {
 
         <section>
           <DataTableGallery />
+        </section>
+
+        <section>
+          <SocialProfilesGallery />
         </section>
       </div>
     </main>
