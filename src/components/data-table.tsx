@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export type DataTableColumn<T> = {
   id: string;
   header: string;
   sortable?: boolean;
-  /** Plain-text value used for sorting and global filter matching */
+  /** Plain-text value used for sorting (and default filtering) */
   getValue: (row: T) => string | number;
   cell: (row: T) => ReactNode;
   headerClassName?: string;
@@ -23,14 +23,17 @@ type DataTableProps<T> = {
   filterPlaceholder?: string;
   emptyMessage?: string;
   className?: string;
-  /** Optional controls rendered beside the filter (e.g. column visibility). */
   toolbarEnd?: ReactNode;
   /**
-   * Optional search text for a row. Defaults to concatenating visible
-   * column getValue() results — pass this when optional columns are hidden
-   * but should still be searchable.
+   * Custom live filter. `queryLower` is already trimmed + lowercased.
+   * When omitted, matches against visible column getValue().
    */
-  getSearchText?: (row: T) => string;
+  filterFn?: (row: T, queryLower: string) => boolean;
+  /** Controlled filter text (parent owns state). */
+  filterValue: string;
+  onFilterValueChange: (value: string) => void;
+  /** Fires whenever the filtered row count changes (for parent counters). */
+  onFilteredCountChange?: (filtered: number, total: number) => void;
 };
 
 export function DataTable<T>({
@@ -41,22 +44,24 @@ export function DataTable<T>({
   emptyMessage = "No rows match the current filter.",
   className,
   toolbarEnd,
-  getSearchText,
+  filterFn,
+  filterValue,
+  onFilterValueChange,
+  onFilteredCountChange,
 }: DataTableProps<T>) {
-  const [filter, setFilter] = useState("");
   const [sortId, setSortId] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
   const filteredSorted = useMemo(() => {
-    const q = filter.trim().toLowerCase();
+    const q = filterValue.trim().toLowerCase();
     let rows = data;
 
     if (q) {
-      rows = rows.filter((row) => {
-        const haystack = getSearchText
-          ? getSearchText(row)
-          : columns.map((col) => String(col.getValue(row))).join(" ");
-        return haystack.toLowerCase().includes(q);
+      rows = data.filter((row) => {
+        if (filterFn) return filterFn(row, q);
+        return columns.some((col) =>
+          String(col.getValue(row)).toLowerCase().includes(q)
+        );
       });
     }
 
@@ -81,7 +86,11 @@ export function DataTable<T>({
     }
 
     return rows;
-  }, [data, columns, filter, sortId, sortDir, getSearchText]);
+  }, [data, columns, filterValue, sortId, sortDir, filterFn]);
+
+  useEffect(() => {
+    onFilteredCountChange?.(filteredSorted.length, data.length);
+  }, [filteredSorted.length, data.length, onFilteredCountChange]);
 
   function toggleSort(columnId: string) {
     if (sortId === columnId) {
@@ -95,15 +104,16 @@ export function DataTable<T>({
   return (
     <div className={cn("space-y-12px", className)}>
       <div className="flex flex-wrap items-center gap-8px">
-        <label className="sr-only" htmlFor="data-table-filter">
+        <label className="sr-only" htmlFor="case-queue-filter">
           Filter table
         </label>
         <input
-          id="data-table-filter"
-          type="search"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
+          id="case-queue-filter"
+          type="text"
+          value={filterValue}
+          onChange={(e) => onFilterValueChange(e.target.value)}
           placeholder={filterPlaceholder}
+          autoComplete="off"
           className="h-9 w-full max-w-sm rounded-inputs border border-ash bg-canvas-white px-12px text-body text-charcoal placeholder:text-fog focus:border-electric-blue focus:outline-none focus:ring-1 focus:ring-electric-blue"
         />
         <span className="shrink-0 font-mono text-caption text-fog">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { CaseSummary } from "@/types";
 import { StatusBadge, getCaseStatusLabel } from "@/components/status-badge";
 import {
@@ -55,7 +55,10 @@ type ColumnId =
   | (typeof DEFAULT_COLUMN_IDS)[number]
   | (typeof OPTIONAL_COLUMN_IDS)[number];
 
-const OPTIONAL_COLUMN_LABELS: Record<(typeof OPTIONAL_COLUMN_IDS)[number], string> = {
+const OPTIONAL_COLUMN_LABELS: Record<
+  (typeof OPTIONAL_COLUMN_IDS)[number],
+  string
+> = {
   language: "Language",
   vettingDeadline: "Vetting deadline",
   reviewDeadline: "Review deadline",
@@ -66,6 +69,21 @@ const OPTIONAL_COLUMN_LABELS: Record<(typeof OPTIONAL_COLUMN_IDS)[number], strin
   assignedQAQC: "QA/QC",
   revetDate: "Re-vet date",
 };
+
+/** Live filter across Influencer, Market, and Status (label + key). */
+export function matchesCaseQueueFilter(
+  row: CaseSummary,
+  queryLower: string
+): boolean {
+  if (!queryLower) return true;
+  const statusLabel = getCaseStatusLabel(row.status).toLowerCase();
+  return (
+    row.influencerName.toLowerCase().includes(queryLower) ||
+    row.market.toLowerCase().includes(queryLower) ||
+    statusLabel.includes(queryLower) ||
+    row.status.toLowerCase().includes(queryLower)
+  );
+}
 
 function DeadlineCell({
   value,
@@ -208,10 +226,19 @@ const ALL_COLUMNS = buildAllColumns();
 type CaseSummaryTableProps = {
   data: CaseSummary[];
   className?: string;
+  filterValue: string;
+  onFilterValueChange: (value: string) => void;
+  onFilteredCountChange?: (filtered: number, total: number) => void;
 };
 
 /** Queue-ready table: default columns + optional column visibility. */
-export function CaseSummaryTable({ data, className }: CaseSummaryTableProps) {
+export function CaseSummaryTable({
+  data,
+  className,
+  filterValue,
+  onFilterValueChange,
+  onFilteredCountChange,
+}: CaseSummaryTableProps) {
   const [open, setOpen] = useState(false);
   const [visibleOptional, setVisibleOptional] = useState<
     Set<(typeof OPTIONAL_COLUMN_IDS)[number]>
@@ -226,6 +253,19 @@ export function CaseSummaryTable({ data, className }: CaseSummaryTableProps) {
   const columns = useMemo(
     () => ALL_COLUMNS.filter((col) => visibleIds.has(col.id as ColumnId)),
     [visibleIds]
+  );
+
+  const filterFn = useCallback(
+    (row: CaseSummary, queryLower: string) =>
+      matchesCaseQueueFilter(row, queryLower),
+    []
+  );
+
+  const handleFilteredCountChange = useCallback(
+    (filtered: number, total: number) => {
+      onFilteredCountChange?.(filtered, total);
+    },
+    [onFilteredCountChange]
   );
 
   function toggleOptional(id: (typeof OPTIONAL_COLUMN_IDS)[number]) {
@@ -245,9 +285,10 @@ export function CaseSummaryTable({ data, className }: CaseSummaryTableProps) {
       filterPlaceholder="Filter by influencer, market, status…"
       emptyMessage="No cases match the current filter."
       className={className}
-      getSearchText={(row) =>
-        ALL_COLUMNS.map((col) => String(col.getValue(row))).join(" ")
-      }
+      filterValue={filterValue}
+      onFilterValueChange={onFilterValueChange}
+      filterFn={filterFn}
+      onFilteredCountChange={handleFilteredCountChange}
       toolbarEnd={
         <div className="relative">
           <button

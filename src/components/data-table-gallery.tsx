@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { CaseSummaryTable } from "@/components/case-summary-table";
 import { caseSummaries } from "@/data";
 import { toLocalDateString } from "@/lib/deadline";
 
 export function DataTableGallery() {
   const today = toLocalDateString();
+  const [filterValue, setFilterValue] = useState("");
 
   return (
     <div className="space-y-16px">
@@ -25,7 +27,11 @@ export function DataTableGallery() {
         </p>
       </div>
 
-      <CaseSummaryTable data={caseSummaries} />
+      <CaseSummaryTable
+        data={caseSummaries}
+        filterValue={filterValue}
+        onFilterValueChange={setFilterValue}
+      />
     </div>
   );
 }
