@@ -54,6 +54,8 @@ v1 doesn't need real authentication — a simple role switcher is sufficient to 
 - Filterable/sortable case table scoped to current role
 - Deadline urgency as a visual state, not a separate view
 - Empty states preserve column headers/filters
+- **Default visible columns:** Influencer, Market, Status, Next Deadline (computed from whichever of the four stage deadlines corresponds to the case's current status), Effort — kept lean to avoid recreating the current Smartsheet's dense column-wall
+- **Toggleable columns** (off by default, available via column show/hide control): Language, individual stage deadlines (Vetting/Review/QA-QC/Submission), Assigned Analyst/Reviewer/QA-QC, Re-vet date. Full detail also always available on the case's own Overview page regardless of table column state.
 
 ### 4.2 Case Workspace
 Left-nav sub-sections within a case:
@@ -106,11 +108,16 @@ type CaseSummary = {
   market: string;
   language: string;
   status: CaseStatus;
-  deadline: string;
+  vettingDeadline: string;
+  reviewDeadline: string;
+  qaqcDeadline: string;
+  submissionDeadline: string;
   isRevet: boolean;
+  revetDate?: string;              // only populated when isRevet is true — date of last vet
   effort: 1 | 2 | 3 | 4 | 5;
   assignedAnalyst: string;
   assignedReviewer: string;
+  assignedQAQC: string;
 }
 
 type CaseStatus =
@@ -148,9 +155,9 @@ type SocialProfile = {
   avgLikes?: number;
   avgComments?: number;
   videoViewRate?: number;
-  audienceCredibility: number;              // %
-  audienceType: { influencers: number; massFollowers: number; suspicious: number };
-  audienceReachability: Record<string, number>;
+  audienceCredibility?: number;             // %, omit (don't zero) if platform has no data
+  audienceType?: { influencers: number; massFollowers: number; suspicious: number };
+  audienceReachability?: Record<string, number>;
   growthSeries: { month: string; followers: number; engagementRate: number }[];
   contentTags: string[];
   brandsOrganic: string[];

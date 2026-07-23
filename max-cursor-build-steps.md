@@ -120,6 +120,13 @@ as horizontal bar rows, a growth trend chart (recharts, line or bar), content
 tags as pills, brand mentions split into organic/paid, and the AI-generated
 "Creator Insights" summary clearly labeled as AI-generated with thumbs up/down
 feedback icons. Use the mock SocialProfile data from Step 3.
+
+N/A handling (required): audienceCredibility, audienceType, and
+audienceReachability are optional on SocialProfile. When
+audienceCredibility is undefined, do NOT render a 0% ring or empty chart —
+show the text "Not available for this platform" instead. Same for
+audienceType / audienceReachability breakdowns when those fields are omitted
+(e.g. Mara Whitfield TikTok + X; Julian Voss TikTok + YouTube).
 ```
 
 ---
