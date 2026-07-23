@@ -1,13 +1,13 @@
-import { casesById, fullCases } from "@/data";
+import { fullCases } from "@/data";
 import type { Case } from "@/types";
 
-export function getCaseById(caseId: string): Case | undefined {
-  return casesById[caseId];
+/** Static seed helpers — live case data lives in Zustand (`useCasesStore`). */
+export function getSeedCaseById(caseId: string): Case | undefined {
+  return fullCases.find((c) => c.id === caseId);
 }
 
-export function listFullCases(): Case[] {
+export function listSeedFullCases(): Case[] {
   return fullCases;
 }
 
-/** Default demo case when opening Case Workspace without an id. */
 export const DEFAULT_CASE_ID = "case-mara-whitfield";

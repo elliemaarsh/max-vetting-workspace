@@ -1,9 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { StatusBadge } from "@/components/status-badge";
-import { listFullCases } from "@/lib/cases";
+import { useCasesStore } from "@/store/cases-store";
 
 export default function CasesIndexPage() {
-  const cases = listFullCases();
+  const fullCases = useCasesStore((s) => s.fullCases);
+  const cases = Object.values(fullCases);
 
   return (
     <main className="flex flex-1 flex-col">
@@ -13,8 +16,7 @@ export default function CasesIndexPage() {
           Open a case
         </h1>
         <p className="mt-4px text-body text-steel">
-          Full workspace (Overview, Evidence, Scorecard) for demo fixtures with
-          complete scorecards.
+          Full workspace for demo fixtures — status reflects live shared state.
         </p>
       </header>
 
@@ -40,11 +42,6 @@ export default function CasesIndexPage() {
             </li>
           ))}
         </ul>
-
-        <p className="text-caption text-fog">
-          Queue-only rows on Home link here when a full fixture exists; others
-          stay queue-only until scorecard data is added.
-        </p>
       </div>
     </main>
   );

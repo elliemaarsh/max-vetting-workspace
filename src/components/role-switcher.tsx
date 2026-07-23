@@ -1,22 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useCasesStore, type DemoRole } from "@/store/cases-store";
 import { cn } from "@/lib/utils";
 
-const ROLES = ["Analyst", "Reviewer", "QA/QC"] as const;
-export type DemoRole = (typeof ROLES)[number];
+const ROLES: DemoRole[] = ["Analyst", "Reviewer", "QA/QC"];
 
 type RoleSwitcherProps = {
   className?: string;
 };
 
-/** v1 demo role switcher — no real auth. */
+/** v1 demo role switcher — stored in Zustand (no real auth). */
 export function RoleSwitcher({ className }: RoleSwitcherProps) {
-  const [role, setRole] = useState<DemoRole>("Analyst");
+  const role = useCasesStore((s) => s.role);
+  const setRole = useCasesStore((s) => s.setRole);
 
   return (
     <div
-      className={cn("inline-flex items-center gap-4px rounded-tags border border-ash bg-paper-mist p-4px", className)}
+      className={cn(
+        "inline-flex items-center gap-4px rounded-tags border border-ash bg-paper-mist p-4px",
+        className
+      )}
       role="group"
       aria-label="Demo role"
     >

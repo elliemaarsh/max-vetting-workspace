@@ -6,94 +6,36 @@ import { CitationList } from "@/components/citation-block";
 import {
   RiskLevelSelector,
   type RiskLevelChange,
-  type RiskValue,
 } from "@/components/risk-level-selector";
-import { insertCitationReverseChron } from "@/lib/citation";
-import type { Case, Citation, ScorecardSection } from "@/types";
+import { SEED_RISK_SUGGESTIONS } from "@/lib/seed-risk";
+import { useCasesStore } from "@/store/cases-store";
 
-type CaseScorecardProps = {
-  caseData: Case;
-};
+type Props = { caseId: string };
 
-/** Fixture suggestion payload from the case mock (Assembly / risk module). */
-function suggestionForSection(
-  caseData: Case,
-  sectionName: string
-): { riskValue: RiskValue; riskReasoning: string } | null {
-  const source = caseData.scorecardSections.find(
-    (s) => s.sectionName === sectionName
-  );
-  if (!source?.riskValue || !source.riskReasoning) return null;
-  return {
-    riskValue: source.riskValue,
-    riskReasoning: source.riskReasoning,
-  };
-}
+export function CaseScorecard({ caseId }: Props) {
+  const caseData = useCasesStore((s) => s.fullCases[caseId]);
+  const updateSectionSummary = useCasesStore((s) => s.updateSectionSummary);
+  const updateSectionRisk = useCasesStore((s) => s.updateSectionRisk);
+  const suggestSectionRisk = useCasesStore((s) => s.suggestSectionRisk);
+  const addSectionCitation = useCasesStore((s) => s.addSectionCitation);
 
-export function CaseScorecard({ caseData }: CaseScorecardProps) {
-  const [sections, setSections] = useState<ScorecardSection[]>(() =>
-    caseData.scorecardSections.map((s) => ({
-      ...s,
-      citations: [...s.citations],
-    }))
-  );
   const [addForIndex, setAddForIndex] = useState<number | null>(null);
 
-  function updateSummary(index: number, summary: string) {
-    setSections((prev) =>
-      prev.map((section, i) => (i === index ? { ...section, summary } : section))
-    );
-  }
+  if (!caseData) return null;
 
-  function updateRisk(index: number, next: RiskLevelChange) {
-    setSections((prev) =>
-      prev.map((section, i) =>
-        i === index
-          ? {
-              ...section,
-              riskLevel: next.riskLevel,
-              riskValue: next.riskValue,
-            }
-          : section
-      )
-    );
-  }
-
-  function suggestRiskLevel(index: number) {
-    const section = sections[index];
-    if (!section) return;
-    const suggestion = suggestionForSection(caseData, section.sectionName);
-    if (!suggestion) return;
-
-    setSections((prev) =>
-      prev.map((s, i) =>
-        i === index
-          ? {
-              ...s,
-              riskLevel: "ai_suggested",
-              riskValue: suggestion.riskValue,
-              riskReasoning: suggestion.riskReasoning,
-            }
-          : s
-      )
-    );
-  }
-
-  function addCitation(index: number, draft: Omit<Citation, "order">) {
-    setSections((prev) =>
-      prev.map((section, i) =>
-        i === index
-          ? {
-              ...section,
-              citations: insertCitationReverseChron(section.citations, draft),
-            }
-          : section
-      )
-    );
-  }
-
+  const sections = caseData.scorecardSections;
   const activeSection =
     addForIndex !== null ? sections[addForIndex] : undefined;
+
+  function handleRiskChange(sectionName: string, next: RiskLevelChange) {
+    updateSectionRisk(caseId, sectionName, next);
+  }
+
+  function handleSuggest(sectionName: string) {
+    const suggestion = SEED_RISK_SUGGESTIONS[caseId]?.[sectionName];
+    if (!suggestion) return;
+    suggestSectionRisk(caseId, sectionName, suggestion);
+  }
 
   return (
     <div className="space-y-24px">
@@ -102,16 +44,16 @@ export function CaseScorecard({ caseData }: CaseScorecardProps) {
           Scorecard Draft
         </h2>
         <p className="mt-4px text-body text-steel">
-          AI-drafted summaries are editable. Use Suggest Risk Level for an
-          AI-suggested state, then confirm or override — humans own the final
-          call.
+          Edits, citations, and risk confirms write to shared case state.
+          Confirming all section risks advances the case to In Review (visible
+          on Home).
         </p>
       </div>
 
       <div className="space-y-16px">
         {sections.map((section, index) => {
           const canSuggest = Boolean(
-            suggestionForSection(caseData, section.sectionName)
+            SEED_RISK_SUGGESTIONS[caseId]?.[section.sectionName]
           );
 
           return (
@@ -139,13 +81,16 @@ export function CaseScorecard({ caseData }: CaseScorecardProps) {
                   <textarea
                     id={`scorecard-summary-${index}`}
                     value={section.summary}
-                    onChange={(e) => updateSummary(index, e.target.value)}
+                    onChange={(e) =>
+                      updateSectionSummary(
+                        caseId,
+                        section.sectionName,
+                        e.target.value
+                      )
+                    }
                     rows={4}
                     className="w-full resize-y rounded-lg border border-ash bg-canvas-white px-12px py-8px text-body text-charcoal placeholder:text-fog focus:border-electric-blue focus:outline-none focus:ring-1 focus:ring-electric-blue"
                   />
-                  <p className="text-caption text-fog">
-                    AI-drafted — edit freely. Changes stay local until export.
-                  </p>
                 </div>
 
                 <div className="space-y-8px">
@@ -177,7 +122,7 @@ export function CaseScorecard({ caseData }: CaseScorecardProps) {
                     <button
                       type="button"
                       disabled={!canSuggest}
-                      onClick={() => suggestRiskLevel(index)}
+                      onClick={() => handleSuggest(section.sectionName)}
                       className="rounded-buttons border border-dashed border-electric-blue bg-[#eff6ff] px-12px py-1.5 text-caption font-medium text-electric-blue hover:bg-[#dbeaff] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       Suggest Risk Level
@@ -188,7 +133,9 @@ export function CaseScorecard({ caseData }: CaseScorecardProps) {
                     riskLevel={section.riskLevel}
                     riskValue={section.riskValue}
                     riskReasoning={section.riskReasoning}
-                    onChange={(next) => updateRisk(index, next)}
+                    onChange={(next) =>
+                      handleRiskChange(section.sectionName, next)
+                    }
                   />
                 </div>
               </div>
@@ -203,7 +150,7 @@ export function CaseScorecard({ caseData }: CaseScorecardProps) {
           sectionName={activeSection.sectionName}
           onClose={() => setAddForIndex(null)}
           onSubmit={(citation) => {
-            if (addForIndex !== null) addCitation(addForIndex, citation);
+            addSectionCitation(caseId, activeSection.sectionName, citation);
           }}
         />
       ) : null}

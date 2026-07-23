@@ -1,10 +1,9 @@
-import { CaseSectionPlaceholder } from "@/components/case-section-placeholder";
+import { CaseActivity } from "@/components/case-activity";
 
-export default function CaseActivityPage() {
-  return (
-    <CaseSectionPlaceholder
-      title="Activity"
-      description="Case-scoped status and change history."
-    />
-  );
+type PageProps = {
+  params: { caseId: string };
+};
+
+export default function CaseActivityPage({ params }: PageProps) {
+  return <CaseActivity caseId={params.caseId} />;
 }

@@ -1,37 +1,39 @@
+"use client";
+
 import type { CaseStatus } from "@/types";
-import { caseSummaries } from "@/data";
 import {
   CASE_STATUS_CONFIG,
   CASE_STATUS_ORDER,
   getCaseStatusLabel,
 } from "@/components/status-badge";
+import { useCasesStore } from "@/store/cases-store";
 import { cn } from "@/lib/utils";
+import { useMemo } from "react";
 
-/** All CaseStatus values — keep in sync with CASE_STATUS_ORDER. */
 export const SUMMARY_STRIP_STATUSES: CaseStatus[] = [...CASE_STATUS_ORDER];
-
-export function countByStatus(
-  statuses: CaseStatus[] = SUMMARY_STRIP_STATUSES
-): Record<CaseStatus, number> {
-  const counts = Object.fromEntries(
-    statuses.map((s) => [s, 0])
-  ) as Record<CaseStatus, number>;
-
-  for (const row of caseSummaries) {
-    if (row.status in counts) {
-      counts[row.status] += 1;
-    }
-  }
-  return counts;
-}
 
 type StatusSummaryStripProps = {
   className?: string;
 };
 
-/** Small stat cards — counts by status, not charts. */
+/** Small stat cards — counts by status from live Zustand queue. */
 export function StatusSummaryStrip({ className }: StatusSummaryStripProps) {
-  const counts = countByStatus();
+  const fullCases = useCasesStore((s) => s.fullCases);
+  const queueOnly = useCasesStore((s) => s.queueOnly);
+
+  const counts = useMemo(() => {
+    const next = Object.fromEntries(
+      SUMMARY_STRIP_STATUSES.map((s) => [s, 0])
+    ) as Record<CaseStatus, number>;
+
+    for (const c of Object.values(fullCases)) {
+      if (c.status in next) next[c.status] += 1;
+    }
+    for (const row of queueOnly) {
+      if (row.status in next) next[row.status] += 1;
+    }
+    return next;
+  }, [fullCases, queueOnly]);
 
   return (
     <div

@@ -4,7 +4,8 @@ import { useState } from "react";
 import { CitationBlock } from "@/components/citation-block";
 import { CoverageScanResult } from "@/components/coverage-scan-result";
 import { SocialProfilesModule } from "@/components/social-profiles-module";
-import type { Case, Citation } from "@/types";
+import { useCasesStore } from "@/store/cases-store";
+import type { Citation } from "@/types";
 
 type EvidenceItem = {
   citation: Citation;
@@ -12,10 +13,11 @@ type EvidenceItem = {
   key: string;
 };
 
-function gatherEvidence(caseData: Case): EvidenceItem[] {
+function gatherEvidence(
+  sections: { sectionName: string; citations: Citation[] }[]
+): EvidenceItem[] {
   const items: EvidenceItem[] = [];
-
-  for (const section of caseData.scorecardSections) {
+  for (const section of sections) {
     for (const citation of section.citations) {
       items.push({
         citation,
@@ -24,7 +26,6 @@ function gatherEvidence(caseData: Case): EvidenceItem[] {
       });
     }
   }
-
   return items.sort((a, b) => {
     const dateCmp = b.citation.date.localeCompare(a.citation.date);
     if (dateCmp !== 0) return dateCmp;
@@ -32,14 +33,21 @@ function gatherEvidence(caseData: Case): EvidenceItem[] {
   });
 }
 
-type CaseEvidenceProps = {
-  caseData: Case;
-};
+type Props = { caseId: string };
 
-export function CaseEvidence({ caseData }: CaseEvidenceProps) {
-  const evidence = gatherEvidence(caseData);
+export function CaseEvidenceContainer({ caseId }: Props) {
+  const caseData = useCasesStore((s) => s.fullCases[caseId]);
+  const scanInserted = useCasesStore(
+    (s) => Boolean(s.coverageScanInserted[caseId])
+  );
+  const insertCoverageScan = useCasesStore((s) => s.insertCoverageScan);
+
   const [scanVisible, setScanVisible] = useState(false);
-  const [scanInserted, setScanInserted] = useState(false);
+
+  if (!caseData) return null;
+
+  const evidence = gatherEvidence(caseData.scorecardSections);
+  const runId = `run_scan_${caseId.replace(/^case-/, "")}_full_01`;
 
   return (
     <div className="space-y-32px">
@@ -49,9 +57,9 @@ export function CaseEvidence({ caseData }: CaseEvidenceProps) {
             Evidence
           </h2>
           <p className="mt-4px text-body text-steel">
-            Confirmed social channels and gathered source items mapped to
-            scorecard sections. Run a Coverage Scan to draft AI findings in
-            context — nothing inserts without an explicit click.
+            Confirmed social channels and gathered source items. Inserting a
+            Coverage Scan writes to shared case state (and can advance pipeline
+            status).
           </p>
         </div>
         <button
@@ -70,13 +78,14 @@ export function CaseEvidence({ caseData }: CaseEvidenceProps) {
               Coverage Scan result
             </h3>
             <p className="font-mono text-caption text-fog">
-              Static mock · scoped to {caseData.id}
+              Scoped to {caseData.id}
             </p>
           </div>
           <CoverageScanResult
             caseData={caseData}
             inserted={scanInserted}
-            onInsert={() => setScanInserted(true)}
+            onInsert={() => insertCoverageScan(caseId, runId)}
+            runId={runId}
           />
         </section>
       ) : null}

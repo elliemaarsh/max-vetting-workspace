@@ -10,7 +10,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { auditEvents, type AuditEvent } from "@/data/audit-events";
+import type { AuditEvent } from "@/data/audit-events";
+import { useCasesStore } from "@/store/cases-store";
 import { cn } from "@/lib/utils";
 
 type ActorFilter = "all" | "human" | "ai";
@@ -32,30 +33,37 @@ const VOLUME = [
 
 function formatTimestamp(iso: string): string {
   try {
-    return new Date(iso).toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-      timeZone: "UTC",
-    }) + " UTC";
+    return (
+      new Date(iso).toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "UTC",
+      }) + " UTC"
+    );
   } catch {
     return iso;
   }
 }
 
-const CASE_OPTIONS = Array.from(
-  new Map(auditEvents.map((e) => [e.caseId, e.caseName])).entries()
-).map(([id, name]) => ({ id, name }));
-
 export function ReportsAuditPage() {
+  const auditLog = useCasesStore((s) => s.auditLog);
   const [actorFilter, setActorFilter] = useState<ActorFilter>("all");
   const [caseFilter, setCaseFilter] = useState<string>("all");
 
+  const caseOptions = useMemo(
+    () =>
+      Array.from(
+        new Map(auditLog.map((e) => [e.caseId, e.caseName])).entries()
+      ).map(([id, name]) => ({ id, name })),
+    [auditLog]
+  );
+
   const filtered = useMemo(() => {
-    return auditEvents
+    return auditLog
       .filter((e) => {
         if (actorFilter === "human" && e.actorKind !== "human") return false;
         if (actorFilter === "ai" && e.actorKind !== "ai") return false;
@@ -63,9 +71,9 @@ export function ReportsAuditPage() {
         return true;
       })
       .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
-  }, [actorFilter, caseFilter]);
+  }, [auditLog, actorFilter, caseFilter]);
 
-  const aiRunCount = auditEvents.filter((e) => e.actorKind === "ai").length;
+  const aiRunCount = auditLog.filter((e) => e.actorKind === "ai").length;
 
   return (
     <main className="flex flex-1 flex-col">
@@ -75,9 +83,8 @@ export function ReportsAuditPage() {
           Throughput & history
         </h1>
         <p className="mt-4px text-body text-steel">
-          Turnaround and volume for program view. Audit log includes AI runs
-          (Coverage Scans, Risk Level suggestions) — the history surface for
-          past AI outputs now that Analysis lives inline on each case.
+          Live audit log from shared state — Coverage Scans, risk suggestions,
+          confirms, and status changes appear here as you work cases.
         </p>
       </header>
 
@@ -165,14 +172,14 @@ export function ReportsAuditPage() {
                 Audit log
               </h2>
               <p className="mt-4px text-body text-steel">
-                Immutable-style history. Filter to{" "}
-                <span className="font-medium text-charcoal">AI runs</span> to
-                review past Coverage Scans and risk suggestions ({aiRunCount}{" "}
-                in mock data).
+                Filter to{" "}
+                <span className="font-medium text-charcoal">AI runs</span> for
+                past Coverage Scans and risk suggestions ({aiRunCount} AI
+                events).
               </p>
             </div>
             <p className="font-mono text-caption text-fog">
-              {filtered.length}/{auditEvents.length} events
+              {filtered.length}/{auditLog.length} events
             </p>
           </div>
 
@@ -214,7 +221,7 @@ export function ReportsAuditPage() {
                 className="rounded-lg border border-ash bg-canvas-white px-8px py-1.5 text-caption text-charcoal focus:border-electric-blue focus:outline-none"
               >
                 <option value="all">All cases</option>
-                {CASE_OPTIONS.map((c) => (
+                {caseOptions.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
                   </option>
@@ -274,7 +281,7 @@ export function ReportsAuditPage() {
 function AuditRow({ event }: { event: AuditEvent }) {
   return (
     <tr className="border-b border-ash last:border-b-0">
-      <td className="px-12px py-2 font-mono text-caption text-fog whitespace-nowrap">
+      <td className="whitespace-nowrap px-12px py-2 font-mono text-caption text-fog">
         {formatTimestamp(event.timestamp)}
       </td>
       <td className="px-12px py-2 text-body text-charcoal">
