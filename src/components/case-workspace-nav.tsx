@@ -17,8 +17,8 @@ type CaseWorkspaceNavProps = {
 };
 
 /**
- * Case-scoped sub-nav — distinct from the app sidebar.
- * Narrow rail with Dub active tint; sits inside the case shell.
+ * Case-scoped sub-nav. Desktop/tablet-landscape: left rail.
+ * Narrow tablet: horizontal scroll strip under the case header.
  */
 export function CaseWorkspaceNav({ caseId }: CaseWorkspaceNavProps) {
   const pathname = usePathname();
@@ -26,7 +26,11 @@ export function CaseWorkspaceNav({ caseId }: CaseWorkspaceNavProps) {
 
   return (
     <nav
-      className="flex w-44 shrink-0 flex-col gap-4px border-r border-ash bg-canvas-white p-8px"
+      className={cn(
+        "flex shrink-0 gap-4px border-ash bg-canvas-white p-8px",
+        "w-full flex-row overflow-x-auto border-b",
+        "md:w-44 md:flex-col md:overflow-visible md:border-b-0 md:border-r"
+      )}
       aria-label="Case sections"
     >
       {SECTIONS.map((section) => {
@@ -41,7 +45,7 @@ export function CaseWorkspaceNav({ caseId }: CaseWorkspaceNavProps) {
             key={section.label}
             href={href}
             className={cn(
-              "rounded-lg px-8px py-2 text-caption font-medium transition-colors",
+              "shrink-0 rounded-lg px-8px py-2 text-caption font-medium transition-colors whitespace-nowrap",
               active
                 ? "bg-[#dbeaff] text-charcoal"
                 : "text-slate hover:bg-paper-mist hover:text-charcoal"

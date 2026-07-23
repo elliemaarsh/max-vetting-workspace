@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 export type DataTableColumn<T> = {
@@ -34,6 +35,13 @@ type DataTableProps<T> = {
   onFilterValueChange: (value: string) => void;
   /** Fires whenever the filtered row count changes (for parent counters). */
   onFilteredCountChange?: (filtered: number, total: number) => void;
+  /**
+   * Loading skeleton — keeps filter + column headers visible
+   * (design-system empty/loading rule).
+   */
+  loading?: boolean;
+  /** Skeleton row count while loading (default 5). */
+  loadingRowCount?: number;
 };
 
 export function DataTable<T>({
@@ -48,6 +56,8 @@ export function DataTable<T>({
   filterValue,
   onFilterValueChange,
   onFilteredCountChange,
+  loading = false,
+  loadingRowCount = 5,
 }: DataTableProps<T>) {
   const [sortId, setSortId] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>("asc");
@@ -89,10 +99,12 @@ export function DataTable<T>({
   }, [data, columns, filterValue, sortId, sortDir, filterFn]);
 
   useEffect(() => {
+    if (loading) return;
     onFilteredCountChange?.(filteredSorted.length, data.length);
-  }, [filteredSorted.length, data.length, onFilteredCountChange]);
+  }, [filteredSorted.length, data.length, onFilteredCountChange, loading]);
 
   function toggleSort(columnId: string) {
+    if (loading) return;
     if (sortId === columnId) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     } else {
@@ -114,17 +126,28 @@ export function DataTable<T>({
           onChange={(e) => onFilterValueChange(e.target.value)}
           placeholder={filterPlaceholder}
           autoComplete="off"
-          className="h-9 w-full max-w-sm rounded-inputs border border-ash bg-canvas-white px-12px text-body text-charcoal placeholder:text-fog focus:border-electric-blue focus:outline-none focus:ring-1 focus:ring-electric-blue"
+          disabled={loading}
+          className="h-9 w-full max-w-sm rounded-inputs border border-ash bg-canvas-white px-12px text-body text-charcoal placeholder:text-steel/70 focus:border-electric-blue focus:outline-none focus:ring-1 focus:ring-electric-blue disabled:cursor-not-allowed disabled:bg-paper-mist disabled:text-steel"
         />
-        <span className="shrink-0 font-mono text-caption text-fog">
-          {filteredSorted.length}/{data.length}
+        <span className="shrink-0 font-mono text-caption text-steel">
+          {loading ? "…" : `${filteredSorted.length}/${data.length}`}
         </span>
         {toolbarEnd ? (
-          <div className="ml-auto flex items-center gap-8px">{toolbarEnd}</div>
+          <div
+            className={cn(
+              "ml-auto flex items-center gap-8px",
+              loading && "pointer-events-none opacity-60"
+            )}
+          >
+            {toolbarEnd}
+          </div>
         ) : null}
       </div>
 
-      <div className="overflow-x-auto rounded-cards border border-ash bg-canvas-white shadow-subtle">
+      <div
+        className="overflow-x-auto rounded-cards border border-ash bg-canvas-white shadow-subtle"
+        aria-busy={loading || undefined}
+      >
         <table className="w-full min-w-[640px] border-collapse text-left text-body">
           <thead>
             <tr className="border-b border-ash bg-paper-mist">
@@ -143,13 +166,14 @@ export function DataTable<T>({
                       <button
                         type="button"
                         onClick={() => toggleSort(col.id)}
-                        className="inline-flex items-center gap-1 text-slate hover:text-charcoal"
+                        disabled={loading}
+                        className="inline-flex items-center gap-1 text-slate hover:text-charcoal disabled:cursor-not-allowed"
                       >
                         {col.header}
                         <span
                           className={cn(
                             "font-mono text-[10px]",
-                            active ? "text-electric-blue" : "text-silver"
+                            active ? "text-electric-blue" : "text-fog"
                           )}
                           aria-hidden="true"
                         >
@@ -165,11 +189,27 @@ export function DataTable<T>({
             </tr>
           </thead>
           <tbody>
-            {filteredSorted.length === 0 ? (
+            {loading ? (
+              Array.from({ length: loadingRowCount }).map((_, rowIdx) => (
+                <tr
+                  key={`skeleton-${rowIdx}`}
+                  className="border-b border-ash last:border-b-0"
+                >
+                  {columns.map((col) => (
+                    <td
+                      key={col.id}
+                      className={cn("px-12px py-3", col.cellClassName)}
+                    >
+                      <Skeleton className="h-3.5 w-full max-w-[9rem]" />
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : filteredSorted.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-12px py-32px text-center text-body text-fog"
+                  className="px-12px py-32px text-center text-body text-steel"
                 >
                   {emptyMessage}
                 </td>

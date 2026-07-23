@@ -77,8 +77,8 @@ export function ReportsAuditPage() {
 
   return (
     <main className="flex flex-1 flex-col">
-      <header className="border-b border-ash bg-canvas-white px-24px py-20px">
-        <p className="font-mono text-caption text-fog">Reports & Audit</p>
+      <header className="border-b border-ash bg-canvas-white px-16px py-20px md:px-24px">
+        <p className="font-mono text-caption text-steel">Reports & Audit</p>
         <h1 className="mt-4px font-display text-heading-sm font-medium tracking-tight text-charcoal">
           Throughput & history
         </h1>
@@ -88,7 +88,7 @@ export function ReportsAuditPage() {
         </p>
       </header>
 
-      <div className="space-y-24px p-24px">
+      <div className="space-y-24px p-16px md:p-24px">
         <div className="grid gap-16px lg:grid-cols-2">
           <section className="rounded-cards border border-ash bg-canvas-white p-16px shadow-subtle">
             <p className="mb-12px text-caption font-semibold uppercase tracking-wide text-slate">

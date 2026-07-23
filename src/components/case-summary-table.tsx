@@ -239,6 +239,7 @@ type CaseSummaryTableProps = {
   filterValue: string;
   onFilterValueChange: (value: string) => void;
   onFilteredCountChange?: (filtered: number, total: number) => void;
+  loading?: boolean;
 };
 
 /** Queue-ready table: default columns + optional column visibility. */
@@ -248,6 +249,7 @@ export function CaseSummaryTable({
   filterValue,
   onFilterValueChange,
   onFilteredCountChange,
+  loading = false,
 }: CaseSummaryTableProps) {
   const [open, setOpen] = useState(false);
   const [visibleOptional, setVisibleOptional] = useState<
@@ -299,6 +301,7 @@ export function CaseSummaryTable({
       onFilterValueChange={onFilterValueChange}
       filterFn={filterFn}
       onFilteredCountChange={handleFilteredCountChange}
+      loading={loading}
       toolbarEnd={
         <div className="relative">
           <button

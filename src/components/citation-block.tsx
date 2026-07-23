@@ -61,7 +61,7 @@ export function CitationList({
 }: CitationListProps) {
   if (citations.length === 0) {
     return (
-      <p className={cn("text-body text-fog", className)}>{emptyLabel}</p>
+      <p className={cn("text-body text-steel", className)}>{emptyLabel}</p>
     );
   }
 

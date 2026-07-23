@@ -39,11 +39,11 @@ export function CaseWorkspaceShell({
 
   return (
     <main className="flex min-h-0 flex-1 flex-col">
-      <header className="border-b border-ash bg-canvas-white px-24px py-16px">
+      <header className="border-b border-ash bg-canvas-white px-16px py-16px md:px-24px">
         <div className="flex flex-wrap items-start justify-between gap-12px">
           <div className="space-y-4px">
-            <p className="font-mono text-caption text-fog">
-              <Link href="/cases" className="hover:text-steel">
+            <p className="font-mono text-caption text-steel">
+              <Link href="/cases" className="hover:text-charcoal">
                 Case Workspace
               </Link>
               <span className="mx-1 text-ash">/</span>
@@ -80,9 +80,11 @@ export function CaseWorkspaceShell({
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
         <CaseWorkspaceNav caseId={caseData.id} />
-        <div className="min-w-0 flex-1 overflow-auto p-24px">{children}</div>
+        <div className="min-w-0 flex-1 overflow-auto p-16px md:p-24px">
+          {children}
+        </div>
       </div>
     </main>
   );

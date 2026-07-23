@@ -54,9 +54,9 @@ export default function HomeQueuePage() {
 
   return (
     <main className="flex-1 overflow-auto">
-      <header className="flex flex-wrap items-end justify-between gap-16px border-b border-ash bg-canvas-white px-24px py-20px">
+      <header className="flex flex-wrap items-end justify-between gap-16px border-b border-ash bg-canvas-white px-16px py-20px md:px-24px">
         <div className="space-y-4px">
-          <p className="font-mono text-caption text-fog">Home / Queue</p>
+          <p className="font-mono text-caption text-steel">Home / Queue</p>
           <h1 className="font-display text-heading-sm font-medium tracking-tight text-charcoal">
             What needs attention
           </h1>
@@ -69,7 +69,7 @@ export default function HomeQueuePage() {
         <RoleSwitcher />
       </header>
 
-      <div className="space-y-24px p-24px">
+      <div className="space-y-24px p-16px md:p-24px">
         <StatusSummaryStrip />
         <CaseQueueSection data={summaries} />
       </div>

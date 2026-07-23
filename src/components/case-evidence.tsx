@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CitationBlock } from "@/components/citation-block";
 import { CoverageScanResult } from "@/components/coverage-scan-result";
 import { SocialProfilesModule } from "@/components/social-profiles-module";
@@ -43,6 +43,13 @@ export function CaseEvidenceContainer({ caseId }: Props) {
   const insertCoverageScan = useCasesStore((s) => s.insertCoverageScan);
 
   const [scanVisible, setScanVisible] = useState(false);
+  const [profilesLoading, setProfilesLoading] = useState(true);
+
+  useEffect(() => {
+    setProfilesLoading(true);
+    const t = window.setTimeout(() => setProfilesLoading(false), 400);
+    return () => window.clearTimeout(t);
+  }, [caseId]);
 
   if (!caseData) return null;
 
@@ -77,7 +84,7 @@ export function CaseEvidenceContainer({ caseId }: Props) {
             <h3 className="text-subheading font-medium text-charcoal">
               Coverage Scan result
             </h3>
-            <p className="font-mono text-caption text-fog">
+            <p className="font-mono text-caption text-steel">
               Scoped to {caseData.id}
             </p>
           </div>
@@ -91,7 +98,10 @@ export function CaseEvidenceContainer({ caseId }: Props) {
       ) : null}
 
       <section className="rounded-cards border border-ash bg-canvas-white p-16px shadow-subtle">
-        <SocialProfilesModule profiles={caseData.socialProfiles} />
+        <SocialProfilesModule
+          profiles={caseData.socialProfiles}
+          loading={profilesLoading}
+        />
       </section>
 
       <section className="space-y-16px">
@@ -99,13 +109,13 @@ export function CaseEvidenceContainer({ caseId }: Props) {
           <h3 className="text-subheading font-medium text-charcoal">
             Gathered evidence
           </h3>
-          <p className="font-mono text-caption text-fog">
+          <p className="font-mono text-caption text-steel">
             {evidence.length} item{evidence.length === 1 ? "" : "s"}
           </p>
         </div>
 
         {evidence.length === 0 ? (
-          <p className="rounded-cards border border-dashed border-ash bg-canvas-white px-24px py-16px text-center text-body text-fog">
+          <p className="rounded-cards border border-dashed border-ash bg-canvas-white px-24px py-16px text-center text-body text-steel">
             No evidence items gathered for this case yet.
           </p>
         ) : (

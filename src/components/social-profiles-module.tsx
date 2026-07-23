@@ -17,11 +17,14 @@ import {
 import { ThumbsDown, ThumbsUp } from "lucide-react";
 import type { SocialProfile } from "@/types";
 import { formatCount, formatPercent } from "@/lib/format";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 type SocialProfilesModuleProps = {
   profiles: SocialProfile[];
   className?: string;
+  /** Show loading skeleton while profiles hydrate. */
+  loading?: boolean;
 };
 
 type Feedback = "up" | "down" | null;
@@ -86,9 +89,58 @@ function HorizontalBarRow({
 
 function NotAvailable() {
   return (
-    <p className="rounded-cards border border-dashed border-ash bg-paper-mist px-12px py-16px text-center text-body text-fog">
+    <p className="rounded-cards border border-dashed border-ash bg-paper-mist px-12px py-16px text-center text-body text-steel">
       Not available for this platform
     </p>
+  );
+}
+
+function SocialProfilesSkeleton({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn("space-y-16px", className)}
+      aria-busy="true"
+      aria-label="Loading social profiles"
+    >
+      <div className="flex flex-wrap items-end justify-between gap-12px">
+        <div className="space-y-8px">
+          <Skeleton className="h-5 w-56" />
+          <Skeleton className="h-3.5 w-72 max-w-full" />
+        </div>
+        <Skeleton className="h-3.5 w-28" />
+      </div>
+      <div className="flex flex-wrap gap-4px rounded-tags border border-ash bg-paper-mist p-4px">
+        <Skeleton className="h-8 w-20 rounded-tags" />
+        <Skeleton className="h-8 w-16 rounded-tags" />
+        <Skeleton className="h-8 w-14 rounded-tags" />
+      </div>
+      <div className="grid gap-16px lg:grid-cols-2">
+        <div className="rounded-cards border border-ash bg-canvas-white p-16px space-y-12px">
+          <Skeleton className="h-3 w-24" />
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex justify-between gap-8px">
+              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-3 w-16" />
+            </div>
+          ))}
+        </div>
+        <div className="rounded-cards border border-ash bg-canvas-white p-16px">
+          <Skeleton className="mb-12px h-3 w-40" />
+          <div className="flex items-center gap-16px">
+            <Skeleton className="h-40 w-40 shrink-0 rounded-full" />
+            <div className="min-w-0 flex-1 space-y-12px">
+              <Skeleton className="h-2 w-full" />
+              <Skeleton className="h-2 w-full" />
+              <Skeleton className="h-2 w-[80%]" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="rounded-cards border border-ash bg-canvas-white p-16px">
+        <Skeleton className="mb-12px h-3 w-32" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    </div>
   );
 }
 
@@ -463,15 +515,20 @@ function ProfilePanel({ profile }: { profile: SocialProfile }) {
 export function SocialProfilesModule({
   profiles,
   className,
+  loading = false,
 }: SocialProfilesModuleProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const active = profiles[activeIndex] ?? profiles[0];
+
+  if (loading) {
+    return <SocialProfilesSkeleton className={className} />;
+  }
 
   if (!profiles.length || !active) {
     return (
       <div
         className={cn(
-          "rounded-cards border border-dashed border-ash p-24px text-center text-body text-fog",
+          "rounded-cards border border-dashed border-ash p-24px text-center text-body text-steel",
           className
         )}
       >
@@ -491,9 +548,7 @@ export function SocialProfilesModule({
             Confirmed channels for this creator — stats feed Strategic Fit.
           </p>
         </div>
-        <p className="font-mono text-caption text-fog">
-          {active.handle}
-        </p>
+        <p className="font-mono text-caption text-steel">{active.handle}</p>
       </div>
 
       <div

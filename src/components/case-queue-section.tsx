@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   CaseSummaryTable,
   matchesCaseQueueFilter,
@@ -13,9 +13,16 @@ type CaseQueueSectionProps = {
 
 /**
  * Owns filter state so the input, row list, and X/Y counter share one value.
+ * Brief loading skeleton on mount demonstrates empty/loading header preservation.
  */
 export function CaseQueueSection({ data }: CaseQueueSectionProps) {
   const [filterValue, setFilterValue] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const t = window.setTimeout(() => setLoading(false), 450);
+    return () => window.clearTimeout(t);
+  }, []);
 
   const filteredCount = useMemo(() => {
     const q = filterValue.trim().toLowerCase();
@@ -33,14 +40,15 @@ export function CaseQueueSection({ data }: CaseQueueSectionProps) {
         <h2 className="text-subheading font-medium text-charcoal">
           Case queue
         </h2>
-        <p className="font-mono text-caption text-fog">
-          {filteredCount}/{data.length} cases
+        <p className="font-mono text-caption text-steel">
+          {loading ? "…" : `${filteredCount}/${data.length}`} cases
         </p>
       </div>
       <CaseSummaryTable
         data={data}
         filterValue={filterValue}
         onFilterValueChange={handleFilterValueChange}
+        loading={loading}
       />
     </section>
   );
